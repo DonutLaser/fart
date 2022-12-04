@@ -1,0 +1,10 @@
+{
+    "svelteSortOrder": "scripts-markup-styles",
+    "svelteStrictMode": false,
+    "svelteBracketNewLine": false,
+    "svelteAllowShorthand": true,
+    "svelteIndentScriptAndStyle": true,
+    "printWidth": 120,
+    "semicolons": true,
+    "tabWidth": 4
+}
