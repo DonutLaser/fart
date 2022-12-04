@@ -34,3 +34,7 @@ export function parseFlowchartJson(json: Flowchart): { nodes: NodeData[], connec
 
     return result;
 }
+
+export function findConnectionIndex(connections: NodeConnection[], fromId: number, toId: number): number {
+    return connections.findIndex(conn => conn.fromNodeId === fromId && conn.toNodeId === toId);
+}

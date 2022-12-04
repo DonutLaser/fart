@@ -5,7 +5,7 @@
     import Toolbar from "./Toolbar.svelte";
     import { onMount } from "svelte";
     import { Event, subscribe } from "./scripts/event-bus";
-    import { getFlowchartJson, parseFlowchartJson } from "./services/app-service";
+    import { findConnectionIndex, getFlowchartJson, parseFlowchartJson } from "./services/app-service";
     import NodeSettings from "./NodeSettings.svelte";
 
     // ================= VARIABLES =================
@@ -132,10 +132,17 @@
             return;
         }
 
-        console.log(selectedDataIndex, dataIndex);
-
-        connections = [...connections, { fromNodeId: nodes[selectedDataIndex].id, toNodeId: nodes[dataIndex].id }];
-        console.log("nodes", JSON.stringify(nodes, null, 2));
+        const index1 = findConnectionIndex(connections, nodes[selectedDataIndex].id, nodes[dataIndex].id);
+        const index2 = findConnectionIndex(connections, nodes[dataIndex].id, nodes[selectedDataIndex].id);
+        if (index1 >= 0) {
+            connections.splice(index1, 1);
+            connections = connections;
+        } else if (index2 >= 0) {
+            connections.splice(index2, 1);
+            connections = connections;
+        } else {
+            connections = [...connections, { fromNodeId: nodes[selectedDataIndex].id, toNodeId: nodes[dataIndex].id }];
+        }
     }
 
     function onNodeEdited(value: string): void {
