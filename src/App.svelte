@@ -55,6 +55,8 @@
 
             nodes = res.nodes;
             connections = res.connections;
+
+            nextId = Math.max(...nodes.map((n) => n.id)) + 1;
         });
 
         reader.readAsText(file);
