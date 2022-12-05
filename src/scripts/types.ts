@@ -33,6 +33,6 @@ export interface NodeSettingsData {
 
 export interface Flowchart {
     // Simplified versions of NodeData and NodeConnection
-    n: { i: number, t: string, p: number[], c: string }[];
+    n: { l: boolean, i: number, t: string, p: number[], c: string }[];
     c: number[][];
 }

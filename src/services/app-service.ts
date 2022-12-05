@@ -4,7 +4,7 @@ export function getFlowchartJson(nodes: NodeData[], connections: NodeConnection[
     const result: Flowchart = { n: [], c: [] };
 
     for (const data of nodes) {
-        result.n.push({ i: data.id, t: data.text, p: [data.position.x, data.position.y], c: data.settings.color });
+        result.n.push({ l: data.isLabel, i: data.id, t: data.text, p: [data.position.x, data.position.y], c: data.settings.color });
     }
 
     for (const conn of connections) {
@@ -18,6 +18,7 @@ export function parseFlowchartJson(json: Flowchart): { nodes: NodeData[], connec
     const result = { nodes: [], connections: [] };
     for (const node of json.n) {
         result.nodes.push({
+            isLabel: node.l,
             id: node.i,
             text: node.t,
             position: { x: node.p[0], y: node.p[1] },
