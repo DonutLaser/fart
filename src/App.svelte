@@ -26,7 +26,7 @@
     });
 
     function onClearConnections() {
-        if (selectedDataIndex < 0) {
+        if (selectedDataIndex < 0 || nodes[selectedDataIndex].isLabel) {
             return;
         }
 
