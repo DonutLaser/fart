@@ -5,12 +5,10 @@
     import Toolbar from "./Toolbar.svelte";
     import { onMount } from "svelte";
     import { Event, subscribe } from "./scripts/event-bus";
-    import { findConnectionIndex, getFlowchartJson, parseFlowchartJson } from "./services/app-service";
+    import * as app from "./services/app-service";
     import NodeSettings from "./NodeSettings.svelte";
 
     // ================= VARIABLES =================
-    let nextId = 0;
-
     let nodes: NodeData[] = [];
     let selectedDataIndex: number = -1;
     let selectedNodeRef: NodeRef;
@@ -36,7 +34,7 @@
     }
 
     function onSave() {
-        const chart = getFlowchartJson(nodes, connections);
+        const chart = app.getFlowchartJson(nodes, connections);
 
         const downloadLink = document.createElement("a");
         downloadLink.href = window.URL.createObjectURL(new Blob([JSON.stringify(chart)], { type: "application/json" }));
@@ -51,12 +49,12 @@
         const reader = new FileReader();
         reader.addEventListener("load", (event) => {
             const contents: Flowchart = JSON.parse(event.target.result as string);
-            const res = parseFlowchartJson(contents);
+            const res = app.parseFlowchartJson(contents);
 
             nodes = res.nodes;
             connections = res.connections;
 
-            nextId = Math.max(...nodes.map((n) => n.id)) + 1;
+            app.setInitialNodeId(Math.max(...nodes.map((n) => n.id)) + 1);
         });
 
         reader.readAsText(file);
@@ -71,18 +69,8 @@
 
         if (event.button === MouseButton.LEFT) {
             if (event.shiftKey || event.altKey) {
-                const isLabel = event.altKey;
                 const color = event.altKey ? "black" : "white;";
-                nodes = [
-                    ...nodes,
-                    {
-                        isLabel,
-                        text: "",
-                        position: { x: event.clientX, y: event.clientY },
-                        id: nextId++,
-                        settings: { color },
-                    },
-                ];
+                nodes = [...nodes, app.createNewNode({ x: event.clientX, y: event.clientY }, event.altKey, color)];
 
                 if (event.ctrlKey && event.shiftKey) {
                     // Connect to the new node automatically
@@ -112,6 +100,10 @@
 
                 selectedNodeRef = null;
                 selectedDataIndex = -1;
+            }
+        } else if (event.key === "D" && event.shiftKey) {
+            if (selectedDataIndex >= 0) {
+                nodes = [...nodes, app.duplicateNode(nodes[selectedDataIndex])];
             }
         }
     }
@@ -149,8 +141,8 @@
             return;
         }
 
-        const index1 = findConnectionIndex(connections, nodes[selectedDataIndex].id, nodes[dataIndex].id);
-        const index2 = findConnectionIndex(connections, nodes[dataIndex].id, nodes[selectedDataIndex].id);
+        const index1 = app.findConnectionIndex(connections, nodes[selectedDataIndex].id, nodes[dataIndex].id);
+        const index2 = app.findConnectionIndex(connections, nodes[dataIndex].id, nodes[selectedDataIndex].id);
         if (index1 >= 0) {
             connections.splice(index1, 1);
             connections = connections;

@@ -1,4 +1,30 @@
-import type { Flowchart, NodeConnection, NodeData } from "../scripts/types";
+import type { Flowchart, NodeConnection, NodeData, Point } from "../scripts/types";
+
+let nextNodeId = 0;
+
+export function setInitialNodeId(value: number): void {
+    nextNodeId = value;
+}
+
+export function createNewNode(position: Point, isLabel: boolean, color: string): NodeData {
+    return {
+        isLabel,
+        text: '',
+        position,
+        id: nextNodeId++,
+        settings: { color },
+    };
+}
+
+export function duplicateNode(original: NodeData): NodeData {
+    return {
+        isLabel: original.isLabel,
+        text: original.text,
+        position: { x: original.position.x + 30, y: original.position.y + 30 },
+        id: nextNodeId++,
+        settings: { color: original.settings.color },
+    };
+}
 
 export function getFlowchartJson(nodes: NodeData[], connections: NodeConnection[]): Flowchart {
     const result: Flowchart = { n: [], c: [] };
