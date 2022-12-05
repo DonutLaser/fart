@@ -6,13 +6,16 @@
     let fileInput!: HTMLInputElement;
 
     // ================= FUNCTIONS =================
+    function onClearConnectionsClick() {
+        emit(Event.CLEAR_CONNECTIONS);
+    }
+
     function onSaveClick() {
         emit(Event.SAVE);
     }
 
     function onLoadClick() {
         fileInput.click();
-        // emit(Event.LOAD);
     }
 
     function onFileLoaded() {
@@ -21,6 +24,7 @@
 </script>
 
 <div class="toolbar">
+    <ToolbarButton name="Clear connections" on:click={onClearConnectionsClick} />
     <ToolbarButton name="Save" on:click={onSaveClick} />
     <ToolbarButton name="Load" on:click={onLoadClick} />
     <input bind:this={fileInput} style="display: none;" type="file" accept=".json" on:change={onFileLoaded} />

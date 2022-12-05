@@ -20,9 +20,20 @@
     // ================= SUBSCRIPTIONS =================
     const subscriptions: Function[] = [];
     onMount(() => {
+        subscriptions.push(subscribe(Event.CLEAR_CONNECTIONS, onClearConnections));
         subscriptions.push(subscribe(Event.SAVE, onSave));
         subscriptions.push(subscribe(Event.LOAD, onLoad));
     });
+
+    function onClearConnections() {
+        if (selectedDataIndex < 0) {
+            return;
+        }
+
+        connections = connections.filter(
+            (conn) => conn.fromNodeId !== nodes[selectedDataIndex].id && conn.toNodeId !== nodes[selectedDataIndex].id
+        );
+    }
 
     function onSave() {
         const chart = getFlowchartJson(nodes, connections);
