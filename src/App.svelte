@@ -162,8 +162,8 @@
         }
     }
 
-    function onNodeEdited(value: string): void {
-        nodes[selectedDataIndex].text = value;
+    function onNodeEdited(value: string, nodeIndex: number): void {
+        nodes[nodeIndex].text = value;
     }
 
     function deselectNode(): void {
@@ -198,7 +198,7 @@
                 onNodeConnected(index);
             }}
             on:edited={(event) => {
-                onNodeEdited(event.detail);
+                onNodeEdited(event.detail, index);
             }} />
     {/each}
     <svg>
