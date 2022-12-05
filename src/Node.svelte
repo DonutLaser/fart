@@ -3,13 +3,10 @@
     const dispatch = createEventDispatcher();
 
     import { onMount } from "svelte";
-    import { MouseButton, NodeSettingsData } from "./scripts/types";
+    import { MouseButton, NodeData } from "./scripts/types";
 
     // ================= VARIABLES =================
-    export let xpos = 0;
-    export let ypos = 0;
-    export let text = "";
-    export let settings: NodeSettingsData;
+    export let data: NodeData;
 
     let div!: HTMLDivElement;
 
@@ -17,7 +14,8 @@
     let isEditing = false;
     let lastValue = "";
 
-    $: position = { x: xpos - 82, y: ypos - 15.5 };
+    $: position = { x: data.position.x - 82, y: data.position.y - 15.5 };
+    $: colorStyle = data.isLabel ? `color: ${data.settings.color};` : `background-color: ${data.settings.color};`;
 
     // ================= SETUP =================
     onMount(() => {
@@ -37,7 +35,7 @@
 
     function onMouseUp(event: MouseEvent): void {
         if (event.button === MouseButton.LEFT) {
-            if (event.ctrlKey) {
+            if (event.ctrlKey && !data.isLabel) {
                 dispatch("connected");
             }
 
@@ -92,8 +90,9 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
     bind:this={div}
-    style="left: {position.x}px; top: {position.y}px; background-color: {settings.color};"
+    style="left: {position.x}px; top: {position.y}px; {colorStyle}"
     class="node"
+    class:label={data.isLabel}
     class:selected={isSelected}
     contenteditable={isEditing}
     on:mousedown={onMouseDown}
@@ -101,7 +100,7 @@
     on:dblclick={onDoubleClick}
     on:keydown={onKeyDown}
     on:blur={onBlur}>
-    {text}
+    {data.text}
 </div>
 
 <style>
@@ -128,6 +127,13 @@
         z-index: 1;
     }
 
+    .node.label {
+        border: 1px solid transparent; /* Trick to make sure text does not jump 1 pixel when border is gone */
+        box-shadow: none;
+
+        background-color: transparent !important;
+    }
+
     .node:hover {
         cursor: pointer;
     }
@@ -136,8 +142,12 @@
         outline: none;
     }
 
-    .node.selected {
+    .node:not(.label).selected {
         box-shadow: 0px 0px 10px 3px rgba(33, 106, 251, 0.25);
+        border: 1px solid rgb(33, 106, 251);
+    }
+
+    .node.label.selected {
         border: 1px solid rgb(33, 106, 251);
     }
 </style>

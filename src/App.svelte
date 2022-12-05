@@ -57,17 +57,21 @@
         }
 
         if (event.button === MouseButton.LEFT) {
-            if (event.shiftKey) {
+            if (event.shiftKey || event.altKey) {
+                const isLabel = event.altKey;
+                const color = event.altKey ? "black" : "white;";
                 nodes = [
                     ...nodes,
                     {
+                        isLabel,
                         text: "",
                         position: { x: event.clientX, y: event.clientY },
                         id: nextId++,
-                        settings: { color: "white" },
+                        settings: { color },
                     },
                 ];
-                if (event.ctrlKey) {
+
+                if (event.ctrlKey && event.shiftKey) {
                     // Connect to the new node automatically
                     onNodeConnected(nodes.length - 1);
                 }
@@ -171,10 +175,7 @@
     </div>
     {#each nodes as node, index (node.id)}
         <Node
-            xpos={node.position.x}
-            ypos={node.position.y}
-            settings={node.settings}
-            bind:text={node.text}
+            data={node}
             on:selected={(event) => {
                 onNodeSelected(event.detail, index);
             }}

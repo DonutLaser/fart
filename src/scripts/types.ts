@@ -5,6 +5,7 @@ export enum MouseButton {
 }
 
 export interface NodeData {
+    isLabel: boolean;
     id: number;
     text: string;
     position: Point;
