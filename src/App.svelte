@@ -120,7 +120,7 @@
         }
     }
 
-    function onNodeSelected(ref: NodeRef, dataIndex: number): void {
+    function onNodeSelected(data: { ref: NodeRef; append: boolean }, dataIndex: number): void {
         let alreadySelected = false;
         for (const index of selectedDataIndices) {
             if (nodes[index].id === nodes[dataIndex].id) {
@@ -132,10 +132,15 @@
             return;
         }
 
-        deselectNode();
+        if (data.append) {
+            selectedNodeRefs = [...selectedNodeRefs, data.ref];
+            selectedDataIndices = [...selectedDataIndices, dataIndex];
+        } else {
+            deselectNode();
 
-        selectedNodeRefs.push(ref);
-        selectedDataIndices.push(dataIndex);
+            selectedNodeRefs = [data.ref];
+            selectedDataIndices = [dataIndex];
+        }
     }
 
     function onNodeStartedDragging(): void {

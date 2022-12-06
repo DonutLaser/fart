@@ -19,7 +19,7 @@
 
     // ================= SETUP =================
     onMount(() => {
-        select();
+        select(false);
         startEditing();
     });
 
@@ -27,7 +27,7 @@
     function onMouseDown(event: MouseEvent): void {
         if (event.button === MouseButton.LEFT) {
             if (!event.ctrlKey) {
-                select();
+                select(event.shiftKey);
                 dispatch("started-dragging");
             }
         }
@@ -62,9 +62,9 @@
         stopEditing();
     }
 
-    function select(): void {
+    function select(append: boolean): void {
         isSelected = true;
-        dispatch("selected", { deselect });
+        dispatch("selected", { ref: { deselect }, append });
     }
 
     export function deselect(): void {
