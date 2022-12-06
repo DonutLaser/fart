@@ -10,8 +10,8 @@
 
     // ================= VARIABLES =================
     let nodes: NodeData[] = [];
-    let selectedDataIndex: number = -1;
-    let selectedNodeRef: NodeRef;
+    let selectedDataIndices: number[] = [];
+    let selectedNodeRefs: NodeRef[] = [];
     let connections: NodeConnection[] = [];
     let isDraggingSelectedNode = false;
 
@@ -24,13 +24,15 @@
     });
 
     function onClearConnections() {
-        if (selectedDataIndex < 0 || nodes[selectedDataIndex].isLabel) {
-            return;
-        }
+        for (const index of selectedDataIndices) {
+            if (nodes[index].isLabel) {
+                continue;
+            }
 
-        connections = connections.filter(
-            (conn) => conn.fromNodeId !== nodes[selectedDataIndex].id && conn.toNodeId !== nodes[selectedDataIndex].id
-        );
+            connections = connections.filter(
+                (conn) => conn.fromNodeId !== nodes[index].id && conn.toNodeId !== nodes[index].id
+            );
+        }
     }
 
     function onSave() {
@@ -89,21 +91,20 @@
 
     function onKeyDown(event: KeyboardEvent): void {
         if (event.key === "Delete") {
-            if (selectedDataIndex >= 0) {
+            for (const index of selectedDataIndices) {
                 connections = connections.filter(
-                    (conn) =>
-                        conn.fromNodeId !== nodes[selectedDataIndex].id && conn.toNodeId !== nodes[selectedDataIndex].id
+                    (conn) => conn.fromNodeId !== nodes[index].id && conn.toNodeId !== nodes[index].id
                 );
 
-                nodes.splice(selectedDataIndex, 1);
+                nodes.splice(index, 1);
                 nodes = nodes;
 
-                selectedNodeRef = null;
-                selectedDataIndex = -1;
+                selectedNodeRefs = [];
+                selectedDataIndices = [];
             }
         } else if (event.key === "D" && event.shiftKey) {
-            if (selectedDataIndex >= 0) {
-                nodes = [...nodes, app.duplicateNode(nodes[selectedDataIndex])];
+            if (selectedDataIndices.length === 1) {
+                nodes = [...nodes, app.duplicateNode(nodes[selectedDataIndices[0]])];
             }
         }
     }
@@ -113,19 +114,28 @@
             return;
         }
 
-        nodes[selectedDataIndex].position.x += event.movementX;
-        nodes[selectedDataIndex].position.y += event.movementY;
+        for (const index of selectedDataIndices) {
+            nodes[index].position.x += event.movementX;
+            nodes[index].position.y += event.movementY;
+        }
     }
 
     function onNodeSelected(ref: NodeRef, dataIndex: number): void {
-        if (nodes[selectedDataIndex]?.id === nodes[dataIndex].id) {
+        let alreadySelected = false;
+        for (const index of selectedDataIndices) {
+            if (nodes[index].id === nodes[dataIndex].id) {
+                alreadySelected = true;
+            }
+        }
+
+        if (alreadySelected) {
             return;
         }
 
         deselectNode();
 
-        selectedNodeRef = ref;
-        selectedDataIndex = dataIndex;
+        selectedNodeRefs.push(ref);
+        selectedDataIndices.push(dataIndex);
     }
 
     function onNodeStartedDragging(): void {
@@ -137,12 +147,12 @@
     }
 
     function onNodeConnected(dataIndex: number): void {
-        if (selectedDataIndex < 0) {
+        if (selectedDataIndices.length !== 1) {
             return;
         }
 
-        const index1 = app.findConnectionIndex(connections, nodes[selectedDataIndex].id, nodes[dataIndex].id);
-        const index2 = app.findConnectionIndex(connections, nodes[dataIndex].id, nodes[selectedDataIndex].id);
+        const index1 = app.findConnectionIndex(connections, nodes[selectedDataIndices[0]].id, nodes[dataIndex].id);
+        const index2 = app.findConnectionIndex(connections, nodes[dataIndex].id, nodes[selectedDataIndices[0]].id);
         if (index1 >= 0) {
             connections.splice(index1, 1);
             connections = connections;
@@ -150,7 +160,10 @@
             connections.splice(index2, 1);
             connections = connections;
         } else {
-            connections = [...connections, { fromNodeId: nodes[selectedDataIndex].id, toNodeId: nodes[dataIndex].id }];
+            connections = [
+                ...connections,
+                { fromNodeId: nodes[selectedDataIndices[0]].id, toNodeId: nodes[dataIndex].id },
+            ];
         }
     }
 
@@ -159,12 +172,12 @@
     }
 
     function deselectNode(): void {
-        if (selectedNodeRef) {
-            selectedNodeRef.deselect();
+        for (const ref of selectedNodeRefs) {
+            ref.deselect();
         }
 
-        selectedNodeRef = null;
-        selectedDataIndex = -1;
+        selectedNodeRefs = [];
+        selectedDataIndices = [];
     }
 </script>
 
@@ -173,8 +186,8 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="app" on:click={onClick}>
     <div class="node-settings-div">
-        {#if selectedDataIndex >= 0}
-            <NodeSettings bind:settings={nodes[selectedDataIndex].settings} />
+        {#if selectedDataIndices.length === 1}
+            <NodeSettings bind:settings={nodes[selectedDataIndices[0]].settings} />
         {/if}
         <!-- <NodeSettings settings={} /> -->
     </div>
