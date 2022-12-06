@@ -7,15 +7,20 @@
 
     // ================= VARIABLES =================
     export let data: NodeData;
+    export let isSelected = true;
 
     let div!: HTMLDivElement;
 
-    let isSelected = false;
     let isEditing = false;
     let lastValue = "";
 
     $: position = { x: data.position.x - 82, y: data.position.y - 15.5 };
     $: colorStyle = data.isLabel ? `color: ${data.settings.color};` : `background-color: ${data.settings.color};`;
+    $: {
+        if (!isSelected) {
+            isEditing = false;
+        }
+    }
 
     // ================= SETUP =================
     onMount(() => {
@@ -63,13 +68,7 @@
     }
 
     function select(append: boolean): void {
-        isSelected = true;
-        dispatch("selected", { ref: { deselect }, append });
-    }
-
-    export function deselect(): void {
-        isSelected = false;
-        isEditing = false;
+        dispatch("selected", append);
     }
 
     function startEditing(): void {

@@ -11,7 +11,6 @@
     // ================= VARIABLES =================
     let nodes: NodeData[] = [];
     let selectedDataIndices: number[] = [];
-    let selectedNodeRefs: NodeRef[] = [];
     let connections: NodeConnection[] = [];
     let isDraggingSelectedNode = false;
 
@@ -35,7 +34,7 @@
         }
     }
 
-    function onSave() {
+    function onSave(): void {
         const chart = app.getFlowchartJson(nodes, connections);
 
         const downloadLink = document.createElement("a");
@@ -47,7 +46,7 @@
         document.body.removeChild(downloadLink);
     }
 
-    function onLoad(file: any) {
+    function onLoad(file: any): void {
         const reader = new FileReader();
         reader.addEventListener("load", (event) => {
             const contents: Flowchart = JSON.parse(event.target.result as string);
@@ -99,7 +98,6 @@
                 nodes.splice(index, 1);
                 nodes = nodes;
 
-                selectedNodeRefs = [];
                 selectedDataIndices = [];
             }
         } else if (event.key === "D" && event.shiftKey) {
@@ -120,7 +118,7 @@
         }
     }
 
-    function onNodeSelected(data: { ref: NodeRef; append: boolean }, dataIndex: number): void {
+    function onNodeSelected(append: boolean, dataIndex: number): void {
         let alreadySelected = false;
         for (const index of selectedDataIndices) {
             if (nodes[index].id === nodes[dataIndex].id) {
@@ -132,13 +130,10 @@
             return;
         }
 
-        if (data.append) {
-            selectedNodeRefs = [...selectedNodeRefs, data.ref];
+        if (append) {
             selectedDataIndices = [...selectedDataIndices, dataIndex];
         } else {
             deselectNode();
-
-            selectedNodeRefs = [data.ref];
             selectedDataIndices = [dataIndex];
         }
     }
@@ -177,11 +172,6 @@
     }
 
     function deselectNode(): void {
-        for (const ref of selectedNodeRefs) {
-            ref.deselect();
-        }
-
-        selectedNodeRefs = [];
         selectedDataIndices = [];
     }
 </script>
@@ -199,6 +189,7 @@
     {#each nodes as node, index (node.id)}
         <Node
             data={node}
+            isSelected={selectedDataIndices.includes(index)}
             on:selected={(event) => {
                 onNodeSelected(event.detail, index);
             }}
