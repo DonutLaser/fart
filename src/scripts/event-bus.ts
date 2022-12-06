@@ -4,6 +4,7 @@ interface Subscription {
 };
 
 export enum Event {
+    SELECT_CONNECTED = 'select-connected',
     CLEAR_CONNECTIONS = 'clear-connections',
     SAVE = 'save',
     LOAD = 'load',

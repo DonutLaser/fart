@@ -6,24 +6,29 @@
     let fileInput!: HTMLInputElement;
 
     // ================= FUNCTIONS =================
-    function onClearConnectionsClick() {
+    function onSelectConnected(): void {
+        emit(Event.SELECT_CONNECTED);
+    }
+
+    function onClearConnectionsClick(): void {
         emit(Event.CLEAR_CONNECTIONS);
     }
 
-    function onSaveClick() {
+    function onSaveClick(): void {
         emit(Event.SAVE);
     }
 
-    function onLoadClick() {
+    function onLoadClick(): void {
         fileInput.click();
     }
 
-    function onFileLoaded() {
+    function onFileLoaded(): void {
         emit(Event.LOAD, fileInput.files[0]);
     }
 </script>
 
 <div class="toolbar">
+    <ToolbarButton name="Select all connected nodes" on:click={onSelectConnected} />
     <ToolbarButton name="Clear connections" on:click={onClearConnectionsClick} />
     <ToolbarButton name="Save" on:click={onSaveClick} />
     <ToolbarButton name="Load" on:click={onLoadClick} />

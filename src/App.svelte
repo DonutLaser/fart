@@ -17,12 +17,55 @@
     // ================= SUBSCRIPTIONS =================
     const subscriptions: Function[] = [];
     onMount(() => {
+        subscriptions.push(subscribe(Event.SELECT_CONNECTED, onSelectConnected));
         subscriptions.push(subscribe(Event.CLEAR_CONNECTIONS, onClearConnections));
         subscriptions.push(subscribe(Event.SAVE, onSave));
         subscriptions.push(subscribe(Event.LOAD, onLoad));
     });
 
-    function onClearConnections() {
+    function onSelectConnected(): void {
+        if (selectedDataIndices.length === 0) {
+            return;
+        }
+
+        const idsToSelect = new Set<number>();
+        let idsToFind = new Set<number>();
+
+        for (const index of selectedDataIndices) {
+            idsToSelect.add(nodes[index].id);
+            idsToFind.add(nodes[index].id);
+        }
+
+        do {
+            const fromConnections = connections.filter((conn) => idsToFind.has(conn.fromNodeId));
+            const toConnections = connections.filter((conn) => idsToFind.has(conn.toNodeId));
+
+            const newIdsToFind = new Set<number>();
+            for (const conn of fromConnections) {
+                if (!idsToSelect.has(conn.toNodeId)) {
+                    newIdsToFind.add(conn.toNodeId);
+                    idsToSelect.add(conn.toNodeId);
+                }
+            }
+
+            for (const conn of toConnections) {
+                if (!idsToSelect.has(conn.fromNodeId)) {
+                    newIdsToFind.add(conn.fromNodeId);
+                    idsToSelect.add(conn.fromNodeId);
+                }
+            }
+
+            idsToFind = newIdsToFind;
+        } while (idsToFind.size > 0);
+
+        selectedDataIndices = [];
+        for (const id of [...idsToSelect]) {
+            const index = nodes.findIndex((n) => n.id === id);
+            selectedDataIndices.push(index);
+        }
+    }
+
+    function onClearConnections(): void {
         for (const index of selectedDataIndices) {
             if (nodes[index].isLabel) {
                 continue;
